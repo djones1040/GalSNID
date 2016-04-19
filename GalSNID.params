@@ -1,8 +1,9 @@
 [main]
-infile = galsnid_in.txt
-galparams = XCtmpl,Halpha_ew,Hbeta_ew,OIII_ew,Rpar
+infile = ../PS1spec_host.txt
+galparams = XCTmpl,Halpha_ew,Hbeta_ew,OIII_ew,Rpar
 outfile = galsnid_out.txt
-classfile = galsnid_trainfile.txt
-ratespriorfile = rates.txt
+classfile = ../PS1_prob_Ibc.txt
+ratespriorfile = ../PIa_tmp.txt
 redshiftcol = z
 idcol = ID
+snrthresh = 5

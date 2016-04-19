@@ -36,7 +36,7 @@ class galsnid:
         if parser == None:
             parser = optparse.OptionParser(usage=usage, conflict_handler="resolve")
 
-        parser.add_option('-v', '--verbose', action="count", dest="verbose",default=1)
+        parser.add_option('-v', '--verbose', action="count", dest="verbose",default=0)
         parser.add_option('--debug', default=False, action="store_true",
                           help='debug mode: more output and debug files')
         parser.add_option('--clobber', default=False, action="store_true",
@@ -58,6 +58,10 @@ for classifying; should match header of input file""")
                               help='name of the redshift column in the input file')
             parser.add_option('--idcol', default=config.get('main','idcol'), type="string",
                               help='name of the ID column in the input file')
+            parser.add_option('--snrthresh', default=map(float,config.get('main','snrthresh'))[0], type="string",
+                              help="""for parameters with uncertainties, require a certain SNR to use them 
+in GalSNID (because GalSNID doesn\'t incorporate host galaxy measurement uncertainty.  GalSNID will look for the parameter 
+followed by '_err' in the input file header to see if parameters have uncertainties""")
         else:
             parser.add_option('-i','--infile', default=None, type="string",
                               help='input file with galaxy data')
@@ -74,6 +78,11 @@ for classifying; should match header of input file""")
                               help='name of the redshift column in the input file')
             parser.add_option('--idcol', default='ID', type="string",
                               help='name of the ID column in the input file')
+            parser.add_option('--snrthresh', default=5, type="string",
+                              help="""for parameters with uncertainties, require a certain SNR to use them 
+in GalSNID (because GalSNID doesn\'t incorporate host galaxy measurement uncertainty.  GalSNID will look for the parameter 
+followed by '_err' in the input file header to see if parameters have uncertainties""")
+
 
         parser.add_option('-c','--configfile', default=None, type="string",
                           help='configuration file with GalSNID options')
@@ -82,7 +91,6 @@ for classifying; should match header of input file""")
 
     def main(self,infile,outfile):
         sndata = txtobj(infile)
-
         fout = open(outfile,'w')
         print >> fout, '# ID z PIa PIa_high PIa_low PIbc PIbc_high PIbc_low PII PII_high PII_low'
 
@@ -93,6 +101,12 @@ for classifying; should match header of input file""")
             PIa_low,PIbc_low,PII_low = 1.0,1.0,1.0
             PIa_high,PIbc_high,PII_high = 1.0,1.0,1.0
             for j in range(len(self.options.galparams)):
+                # SNR threshold
+                if self.options.snrthresh and sndata.__dict__.has_key('%s_err'%self.options.galparams[j]):
+                    if sndata.__dict__[self.options.galparams[j]][i]/sndata.__dict__['%s_err'%self.options.galparams[j]][i] < self.options.snrthresh:
+                        if self.options.verbose: print('Measurement SNR for variable %s < threshold of %.1f'%(self.options.galparams[j],self.options.snrthresh))
+                        continue
+
                 # default probabilities
                 PIa *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ia',verbose=self.options.verbose)
                 PIbc *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ibc',verbose=self.options.verbose)
