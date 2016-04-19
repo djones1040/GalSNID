@@ -1,0 +1,8 @@
+[main]
+infile = galsnid_in.txt
+galparams = XCtmpl,Halpha_ew,Hbeta_ew,OIII_ew,Rpar
+outfile = galsnid_out.txt
+classfile = galsnid_trainfile.txt
+ratespriorfile = rates.txt
+redshiftcol = z
+idcol = ID
