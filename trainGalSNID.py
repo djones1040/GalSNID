@@ -150,8 +150,8 @@ followed by '_csnr' in the input file header to see if parameters have uncertain
                                        (sndata.__dict__[p] != '-99') &
                                        (snr > self.options.snrthresh))[0])
             errIal,errIau = scipy.stats.poisson.interval(0.68,Ia)
-            errIbcl,errIIu = scipy.stats.poisson.interval(0.68,Ibc)
-            errIIl,errIbcu = scipy.stats.poisson.interval(0.68,II)
+            errIbcl,errIbcu = scipy.stats.poisson.interval(0.68,Ibc)
+            errIIl,errIIu = scipy.stats.poisson.interval(0.68,II)
             P_Ia_train = (Ia/float(totalIa),errIal/float(totalIa),errIau/float(totalIa))
             P_Ibc_train = (Ibc/float(totalIbc),errIbcl/float(totalIbc),errIbcu/float(totalIbc))
             P_II_train = (II/float(totalII),errIIl/float(totalII),errIIu/float(totalII))
@@ -183,8 +183,6 @@ USAGE: trainGalSNID.py [options]
     else: config=None
     parser = gs.add_options(usage=usagestring,config=config)
     options,  args = parser.parse_args()
-
-    options.galparams = options.galparams.split(',')
 
 
     gs.options = options

@@ -1,5 +1,5 @@
 [main]
-infile = ../loss_host.txt
+infile = ../total_host.txt
 outfile = PIa_train.txt
 redshiftcol = z
 idcol = ID

@@ -108,19 +108,34 @@ followed by '_csnr' in the input file header to see if parameters have uncertain
                         continue
 
                 # default probabilities
-                PIa *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ia',verbose=self.options.verbose)
-                PIbc *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ibc',verbose=self.options.verbose)
-                PII *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='II',verbose=self.options.verbose)
+                PIa *= pt.getP(self.options.galparams[j],
+                               sndata.__dict__[self.options.galparams[j]][i],
+                               type='Ia',verbose=self.options.verbose)
+                PIbc *= pt.getP(self.options.galparams[j],
+                                sndata.__dict__[self.options.galparams[j]][i],
+                                type='Ibc',verbose=self.options.verbose)
+                PII *= pt.getP(self.options.galparams[j],
+                               sndata.__dict__[self.options.galparams[j]][i],
+                               type='II',verbose=self.options.verbose)
 
                 # low probabilities (68% CI from training)
-                PIa_low *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ia',low=True,verbose=self.options.verbose)
-                PIbc_low *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ibc',low=True,verbose=self.options.verbose)
-                PII_low *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='II',low=True,verbose=self.options.verbose)
+                PIa_low *= pt.getP(self.options.galparams[j],
+                                   sndata.__dict__[self.options.galparams[j]][i],
+                                   type='Ia',low=True,verbose=self.options.verbose)
+                PIbc_low *= pt.getP(self.options.galparams[j],
+                                    sndata.__dict__[self.options.galparams[j]][i],
+                                    type='Ibc',low=True,verbose=self.options.verbose)
+                PII_low *= pt.getP(self.options.galparams[j],
+                                   sndata.__dict__[self.options.galparams[j]][i],
+                                   type='II',low=True,verbose=self.options.verbose)
 
                 # high probabilities (68% CI from training)
-                PIa_high *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ia',high=True,verbose=self.options.verbose)
-                PIbc_high *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ibc',high=True,verbose=self.options.verbose)
-                PII_high *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='II',high=True,verbose=self.options.verbose)
+                PIa_high *= pt.getP(self.options.galparams[j],
+                                    sndata.__dict__[self.options.galparams[j]][i],type='Ia',high=True,verbose=self.options.verbose)
+                PIbc_high *= pt.getP(self.options.galparams[j],
+                                     sndata.__dict__[self.options.galparams[j]][i],type='Ibc',high=True,verbose=self.options.verbose)
+                PII_high *= pt.getP(self.options.galparams[j],
+                                    sndata.__dict__[self.options.galparams[j]][i],type='II',high=True,verbose=self.options.verbose)
 
             # rates prior
             PIa *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'Ia')
@@ -169,7 +184,7 @@ class PIaTable(object):
     def __init__(self,trainfile=None):
         if trainfile == None:
             raise exceptions.RuntimeError('Error : SN training file not provided!!!')
-        
+
         fin = open(trainfile,'r')
         for line in fin:
             line = line.replace('\n','')
@@ -186,8 +201,8 @@ class PIaTable(object):
                                                             'PIbc-':float(line.split('Ibc: ')[-1].split(',')[1]),
                                                             'PII':float(line.split('II: ')[-1].split(',')[0]),
                                                             'PII+':float(line.split('II: ')[-1].split(',')[2].split(' ')[0]),
-                                                            'PII-':float(line.split('II: ')[-1].split(',')[1]),
-                                                            'NSNe':float(line.split(' ')[-1])}
+                                                            'PII-':float(line.split('II: ')[-1].split(',')[1])}#,
+                                                            #'NSNe':float(line.split(' ')[-1])}
                 else:
                     self.__dict__[key] = np.append(self.__dict__[key],{'par_min':float(line.split(' ')[1].split(',')[0]),
                                                                        'par_max':float(line.split(' ')[1].split(',')[1]),
@@ -199,8 +214,8 @@ class PIaTable(object):
                                                                        'PIbc-':float(line.split('Ibc: ')[-1].split(',')[1]),
                                                                        'PII':float(line.split('II: ')[-1].split(',')[0]),
                                                                        'PII+':float(line.split('II: ')[-1].split(',')[2].split(' ')[0]),
-                                                                       'PII-':float(line.split('II: ')[-1].split(',')[1]),
-                                                                       'NSNe':float(line.split(' ')[-1])})
+                                                                       'PII-':float(line.split('II: ')[-1].split(',')[1])})#,
+                                                                       #'NSNe':float(line.split(' ')[-1])})
             else:
                 if not line.startswith('#'):
                     if not self.__dict__.has_key(key):
@@ -213,8 +228,8 @@ class PIaTable(object):
                                               'PIbc-':float(line.split('Ibc: ')[-1].split(',')[1]),
                                               'PII':float(line.split('II: ')[-1].split(',')[0]),
                                               'PII+':float(line.split('II: ')[-1].split(',')[2].split(' ')[0]),
-                                              'PII-':float(line.split('II: ')[-1].split(',')[1]),
-                                              'NSNe':float(line.split(' ')[-1])}
+                                              'PII-':float(line.split('II: ')[-1].split(',')[1])}#,
+                                              #'NSNe':float(line.split(' ')[-1])}
                     else:
                         self.__dict__[key] = np.append(self.__dict__[key],{'par':filter(None,line.split('%s:'%key)[1].split(' '))[0],
                                                                            'PIa':float(line.split('Ia: ')[-1].split('CC: ')[0].split(',')[0]),
@@ -225,8 +240,8 @@ class PIaTable(object):
                                                                            'PIbc-':float(line.split('Ibc: ')[-1].split(',')[1]),
                                                                            'PII':float(line.split('II: ')[-1].split(',')[0]),
                                                                            'PII+':float(line.split('II: ')[-1].split(',')[2].split(' ')[0]),
-                                                                           'PII-':float(line.split('II: ')[-1].split(',')[1]),
-                                                                           'NSNe':float(line.split(' ')[-1])})
+                                                                           'PII-':float(line.split('II: ')[-1].split(',')[1])})#,
+                                                                           #'NSNe':float(line.split(' ')[-1])})
 
 
         fin.close()
@@ -238,29 +253,17 @@ class PIaTable(object):
                     if not low and not high:
                         return(self.__dict__[key][i]['P%s'%type])
                     elif low:
-                        P = self.__dict__[key][i]['P%s'%type]-self.__dict__[key][i]['P%s-'%type]
-                        if P < 0: return(0.0)
-                        elif P > 1: return(1.0)
-                        else: return(P)
+                        return(self.__dict__[key][i]['P%s-'%type])
                     elif high:
-                        P = self.__dict__[key][i]['P%s'%type]+self.__dict__[key][i]['P%s+'%type]
-                        if P < 0: return(0.0)
-                        elif P > 1: return(1.0)
-                        else: return(P)
+                        return(self.__dict__[key][i]['P%s+'%type])
             else:
                 if self.__dict__[key][i]['par_min'] <= val and self.__dict__[key][i]['par_max'] > val:
                     if not low and not high:
                         return(self.__dict__[key][i]['P%s'%type])
                     elif low:
-                        P = self.__dict__[key][i]['P%s'%type]-self.__dict__[key][i]['P%s-'%type]
-                        if P < 0: return(0.0)
-                        elif P > 1: return(1.0)
-                        else: return(P)
+                        return(self.__dict__[key][i]['P%s-'%type])
                     elif high:
-                        P = self.__dict__[key][i]['P%s'%type]+self.__dict__[key][i]['P%s+'%type]
-                        if P < 0: return(0.0)
-                        elif P > 1: return(1.0)
-                        else: return(P)
+                        return(self.__dict__[key][i]['P%s+'%type])
 
         if verbose: print('Warning : value %s not defined for host parameter %s'%(val,key))
         return(1.0)
