@@ -1,6 +1,6 @@
 [main]
 infile = ../PS1spec_host.txt
-galparams = XCTmpl,Halpha_ew,Hbeta_ew,OIII_ew,Rpar
+galparams = XCTmpl,Halpha_ew,Hbeta_ew,OIII_ew,OII_ew,Rpar
 outfile = galsnid_out.txt
 classfile = ../PS1_prob_Ibc.txt
 ratespriorfile = ../PIa_tmp.txt

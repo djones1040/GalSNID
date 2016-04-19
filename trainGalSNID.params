@@ -1,0 +1,11 @@
+[main]
+infile = ../loss_host.txt
+outfile = PIa_train.txt
+redshiftcol = z
+idcol = ID
+spectypecol = type
+snrthresh = 3
+galparamfile = galparams.txt
+iafrac = 0.24
+ibcfrac = 0.19
+iifrac = 0.57

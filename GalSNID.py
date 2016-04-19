@@ -59,9 +59,9 @@ for classifying; should match header of input file""")
             parser.add_option('--idcol', default=config.get('main','idcol'), type="string",
                               help='name of the ID column in the input file')
             parser.add_option('--snrthresh', default=map(float,config.get('main','snrthresh'))[0], type="string",
-                              help="""for parameters with uncertainties, require a certain SNR to use them 
+                              help="""for parameters with uncertainties, require a certain continuum SNR to use them 
 in GalSNID (because GalSNID doesn\'t incorporate host galaxy measurement uncertainty.  GalSNID will look for the parameter 
-followed by '_err' in the input file header to see if parameters have uncertainties""")
+followed by '_csnr' in the input file header to see if parameters have uncertainties""")
         else:
             parser.add_option('-i','--infile', default=None, type="string",
                               help='input file with galaxy data')
@@ -79,9 +79,9 @@ for classifying; should match header of input file""")
             parser.add_option('--idcol', default='ID', type="string",
                               help='name of the ID column in the input file')
             parser.add_option('--snrthresh', default=5, type="string",
-                              help="""for parameters with uncertainties, require a certain SNR to use them 
+                              help="""for parameters with uncertainties, require a certain continuum SNR to use them 
 in GalSNID (because GalSNID doesn\'t incorporate host galaxy measurement uncertainty.  GalSNID will look for the parameter 
-followed by '_err' in the input file header to see if parameters have uncertainties""")
+followed by '_csnr' in the input file header to see if parameters have uncertainties""")
 
 
         parser.add_option('-c','--configfile', default=None, type="string",
@@ -102,8 +102,8 @@ followed by '_err' in the input file header to see if parameters have uncertaint
             PIa_high,PIbc_high,PII_high = 1.0,1.0,1.0
             for j in range(len(self.options.galparams)):
                 # SNR threshold
-                if self.options.snrthresh and sndata.__dict__.has_key('%s_err'%self.options.galparams[j]):
-                    if sndata.__dict__[self.options.galparams[j]][i]/sndata.__dict__['%s_err'%self.options.galparams[j]][i] < self.options.snrthresh:
+                if self.options.snrthresh and sndata.__dict__.has_key('%s_csnr'%self.options.galparams[j]):
+                    if sndata.__dict__[self.options.galparams[j]][i]/sndata.__dict__['%s_csnr'%self.options.galparams[j]][i] < self.options.snrthresh:
                         if self.options.verbose: print('Measurement SNR for variable %s < threshold of %.1f'%(self.options.galparams[j],self.options.snrthresh))
                         continue
 
@@ -268,7 +268,7 @@ class PIaTable(object):
 if __name__ == "__main__":
     usagestring="""Run GalSNID on a SN sample.
 
-USAGE: trainGalSNID.py [options]
+USAGE: GalSNID.py [options]
 
 """
     import exceptions
