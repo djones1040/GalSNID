@@ -2,6 +2,31 @@
 # D. Jones - 4/19/16
 import numpy as np
 
+class txtobj:
+    def __init__(self,filename):
+        import numpy as np
+        fin = open(filename,'r')
+        lines = fin.readlines()
+        for l in lines:
+            if l.startswith('#'):
+                l = l.replace('\n','')
+                coldefs = l.split()[1:]
+                break
+        try: coldefs
+        except NameError:
+            raise RuntimeError('Error : file %s has no header'%filename)
+                
+        with open(filename) as f:
+            reader = [x.split() for x in f if not x.startswith('#')]
+
+        i = 0
+        for column in zip(*reader):
+            try:
+                self.__dict__[coldefs[i]] = np.array(column[:]).astype(float)
+            except:
+                self.__dict__[coldefs[i]] = np.array(column[:])
+            i += 1
+
 class galsnid:
     def __init__(self):
         self.clobber = False
@@ -59,45 +84,72 @@ for classifying; should match header of input file""")
         sndata = txtobj(infile)
 
         fout = open(outfile,'w')
-        print >> fout, '# ID z PIa PIa_high PIa_low'
+        print >> fout, '# ID z PIa PIa_high PIa_low PIbc PIbc_high PIbc_low PII PII_high PII_low'
 
-        PIa,PIbc,PII = 1.0,1.0,1.0
-        PIa_low,PIbc_low,PII_low = 1.0,1.0,1.0
-        PIa_high,PIbc_high,PII_high = 1.0,1.0,1.0
+        pt = PIaTable(trainfile=self.options.classfile)
+
         for i in range(len(sndata.__dict__[self.options.galparams[0]])):
+            PIa,PIbc,PII = 1.0,1.0,1.0
+            PIa_low,PIbc_low,PII_low = 1.0,1.0,1.0
+            PIa_high,PIbc_high,PII_high = 1.0,1.0,1.0
             for j in range(len(self.options.galparams)):
                 # default probabilities
-                for P,type in zip([PIa,PIbc,PII],['Ia','Ibc','II']):
-                    P *= self.PIaTable.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type=type)
+                PIa *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ia',verbose=self.options.verbose)
+                PIbc *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ibc',verbose=self.options.verbose)
+                PII *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='II',verbose=self.options.verbose)
 
                 # low probabilities (68% CI from training)
-                for P,type in zip([PIa_low,PIbc_low,PII_low],['Ia','Ibc','II']):
-                    P *= self.PIaTable.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],low=True)
+                PIa_low *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ia',low=True,verbose=self.options.verbose)
+                PIbc_low *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ibc',low=True,verbose=self.options.verbose)
+                PII_low *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='II',low=True,verbose=self.options.verbose)
 
-                # low probabilities (68% CI from training)
-                for P,type in zip([PIa_high,PIbc_high,PII_high],['Ia','Ibc','II']):
-                    P *= self.PIaTable.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],high=True)
+                # high probabilities (68% CI from training)
+                PIa_high *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ia',high=True,verbose=self.options.verbose)
+                PIbc_high *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='Ibc',high=True,verbose=self.options.verbose)
+                PII_high *= pt.getP(self.options.galparams[j],sndata.__dict__[self.options.galparams[j]][i],type='II',high=True,verbose=self.options.verbose)
 
             # rates prior
-            for P1,PIb,P2 in zip([PIa,PIa_low,PIa_high],[PIbc,PIbc_low,PIbc_high],[PII,PII_low,PII_high]):
-                P1 *= self.ratesprior(sndata.__dict__[self.options.redshift][i],'Ia')
-                PIb *= self.ratesprior(sndata.__dict__[self.options.redshift][i],'Ibc')
-                P2 *= self.ratesprior(sndata.__dict__[self.options.redshift][i],'II')
+            PIa *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'Ia')
+            PIa_low *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'Ia')
+            PIa_high *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'Ia')
+            PIbc *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'Ibc')
+            PIbc_low *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'Ibc')
+            PIbc_high *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'Ibc')
+            PII *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'II')
+            PII_low *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'II')
+            PII_high *= self.ratesprior(sndata.__dict__[self.options.redshiftcol][i],'II')
 
-            PIa_final = PIa/(PIa + PIbc + PII)
+            # Ia probs
+            try:
+                PIa_final = PIa/(PIa + PIbc + PII)
+            except:
+                import pdb; pdb.set_trace()
             PIa_final_low = PIa_low/(PIa_low + PIbc_low + PII_low)
             PIa_final_high = PIa_high/(PIa_high + PIbc_high + PII_high)
 
-            print >> fout, '%s %.3f %.4f %.4f %.4f'%(sndata.__dict__[self.options.id][i],
-                                                     sndata.__dict__[self.options.redshift][i],
-                                                     PIa_final,PIa_final_low,PIa_final_high)
+            # Ibc probs
+            PIbc_final = PIbc/(PIa + PIbc + PII)
+            PIbc_final_low = PIbc_low/(PIa_low + PIbc_low + PII_low)
+            PIbc_final_high = PIbc_high/(PIa_high + PIbc_high + PII_high)
+
+            # II probs
+            PII_final = PII/(PIa + PIbc + PII)
+            PII_final_low = PII_low/(PIa_low + PIbc_low + PII_low)
+            PII_final_high = PII_high/(PIa_high + PIbc_high + PII_high)
+
+            print >> fout, '%s %.3f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f'%(
+                sndata.__dict__[self.options.idcol][i],
+                sndata.__dict__[self.options.redshiftcol][i],
+                PIa_final,PIa_final_low,PIa_final_high,
+                PIbc_final,PIbc_final_low,PIbc_final_high,
+                PII_final,PII_final_low,PII_final_high)
 
         fout.close()
 
-    def ratesprior(self,z,class):
+    def ratesprior(self,z,cls):
         rp = txtobj(self.options.ratespriorfile)
-        frac = 'frac_%s'%class
-        return(np.interp(z,rp.__dict__[self.options.redshift],rp.__dict__[frac]))
+        frac = 'frac_%s'%cls
+        return(np.interp(z,rp.__dict__[self.options.redshiftcol],rp.__dict__[frac]))
 
 class PIaTable(object):
     def __init__(self,trainfile=None):
@@ -165,25 +217,38 @@ class PIaTable(object):
 
         fin.close()
 
-    def getP(self,key,val,type='Ia',low=False,high=False):
+    def getP(self,key,val,type='Ia',low=False,high=False,verbose=False):
         for i in range(len(self.__dict__[key])):
             if self.__dict__[key][i].has_key('par'):
                 if self.__dict__[key][i]['par'] == val:
                     if not low and not high:
                         return(self.__dict__[key][i]['P%s'%type])
                     elif low:
-                        return(self.__dict__[key][i]['P%s'%type]-self.__dict__[key][i]['P%s-'%type])
+                        P = self.__dict__[key][i]['P%s'%type]-self.__dict__[key][i]['P%s-'%type]
+                        if P < 0: return(0.0)
+                        elif P > 1: return(1.0)
+                        else: return(P)
                     elif high:
-                        return(self.__dict__[key][i]['P%s'%type]+self.__dict__[key][i]['P%s+'%type])
+                        P = self.__dict__[key][i]['P%s'%type]+self.__dict__[key][i]['P%s+'%type]
+                        if P < 0: return(0.0)
+                        elif P > 1: return(1.0)
+                        else: return(P)
             else:
                 if self.__dict__[key][i]['par_min'] <= val and self.__dict__[key][i]['par_max'] > val:
                     if not low and not high:
                         return(self.__dict__[key][i]['P%s'%type])
                     elif low:
-                        return(self.__dict__[key][i]['P%s'%type]-self.__dict__[key][i]['P%s-'%type])
+                        P = self.__dict__[key][i]['P%s'%type]-self.__dict__[key][i]['P%s-'%type]
+                        if P < 0: return(0.0)
+                        elif P > 1: return(1.0)
+                        else: return(P)
                     elif high:
-                        return(self.__dict__[key][i]['P%s'%type]+self.__dict__[key][i]['P%s+'%type])
-        print('Warning : value %s not defined for host parameter %s'%(val,key))
+                        P = self.__dict__[key][i]['P%s'%type]+self.__dict__[key][i]['P%s+'%type]
+                        if P < 0: return(0.0)
+                        elif P > 1: return(1.0)
+                        else: return(P)
+
+        if verbose: print('Warning : value %s not defined for host parameter %s'%(val,key))
         return(1.0)
         
 if __name__ == "__main__":
@@ -203,7 +268,7 @@ USAGE: trainGalSNID.py [options]
     options,  args = parser.parse_args()
     if options.configfile:
         config = ConfigParser.ConfigParser()
-        config.read(options.paramfile)
+        config.read(options.configfile)
     else: config=None
     parser = gs.add_options(usage=usagestring,config=config)
     options,  args = parser.parse_args()
@@ -218,4 +283,4 @@ USAGE: trainGalSNID.py [options]
     import numpy as np
     import pylab as p
 
-    gs.classifyIbc(options.infile,options.outfile)
+    gs.main(options.infile,options.outfile)
