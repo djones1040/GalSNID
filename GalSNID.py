@@ -58,6 +58,10 @@ for classifying; should match header of input file""")
                               help='name of the redshift column in the input file')
             parser.add_option('--idcol', default=config.get('main','idcol'), type="string",
                               help='name of the ID column in the input file')
+            parser.add_option('--spectypecol', default=config.get('main','spectypecol'), type="string",
+                              help='name of the ID column in the input file')
+            parser.add_option('--writetypecol', default=config.get('main','writetypecol'), type="int",
+                              help='name of the ID column in the input file')
             parser.add_option('--snrthresh', default=map(float,config.get('main','snrthresh'))[0], type="string",
                               help="""for parameters with uncertainties, require a certain continuum SNR to use them 
 in GalSNID (because GalSNID doesn\'t incorporate host galaxy measurement uncertainty.  GalSNID will look for the parameter 
@@ -78,6 +82,10 @@ for classifying; should match header of input file""")
                               help='name of the redshift column in the input file')
             parser.add_option('--idcol', default='ID', type="string",
                               help='name of the ID column in the input file')
+            parser.add_option('--spectypecol', default='ID', type="string",
+                              help='name of the ID column in the input file')
+            parser.add_option('--writetypecol', default=0, type="int",
+                              help='name of the ID column in the input file')
             parser.add_option('--snrthresh', default=5, type="string",
                               help="""for parameters with uncertainties, require a certain continuum SNR to use them 
 in GalSNID (because GalSNID doesn\'t incorporate host galaxy measurement uncertainty.  GalSNID will look for the parameter 
@@ -92,7 +100,11 @@ followed by '_csnr' in the input file header to see if parameters have uncertain
     def main(self,infile,outfile):
         sndata = txtobj(infile)
         fout = open(outfile,'w')
-        print >> fout, '# ID z PIa PIa_high PIa_low PIbc PIbc_high PIbc_low PII PII_high PII_low'
+
+        if not self.options.writetypecol:
+            print >> fout, '# ID z PIa PIa_high PIa_low PIbc PIbc_high PIbc_low PII PII_high PII_low'
+        else:
+            print >> fout, '# ID z %s PIa PIa_high PIa_low PIbc PIbc_high PIbc_low PII PII_high PII_low'%(self.options.spectypecol)
 
         pt = PIaTable(trainfile=self.options.classfile)
 
@@ -166,12 +178,22 @@ followed by '_csnr' in the input file header to see if parameters have uncertain
             PII_final_low = PII_low/(PIa_low + PIbc_low + PII_low)
             PII_final_high = PII_high/(PIa_high + PIbc_high + PII_high)
 
-            print >> fout, '%s %.3f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f'%(
-                sndata.__dict__[self.options.idcol][i],
-                sndata.__dict__[self.options.redshiftcol][i],
-                PIa_final,PIa_final_low,PIa_final_high,
-                PIbc_final,PIbc_final_low,PIbc_final_high,
-                PII_final,PII_final_low,PII_final_high)
+            if not self.options.writetypecol:
+                print >> fout, '%s %.3f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f'%(
+                    sndata.__dict__[self.options.idcol][i],
+                    sndata.__dict__[self.options.redshiftcol][i],
+                    PIa_final,PIa_final_low,PIa_final_high,
+                    PIbc_final,PIbc_final_low,PIbc_final_high,
+                    PII_final,PII_final_low,PII_final_high)
+            else:
+                print >> fout, '%s %.3f %s %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f'%(
+                    sndata.__dict__[self.options.idcol][i],
+                    sndata.__dict__[self.options.redshiftcol][i],
+                    sndata.__dict__[self.options.spectypecol][i],
+                    PIa_final,PIa_final_low,PIa_final_high,
+                    PIbc_final,PIbc_final_low,PIbc_final_high,
+                    PII_final,PII_final_low,PII_final_high)
+
 
         fout.close()
 

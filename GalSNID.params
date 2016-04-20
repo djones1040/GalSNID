@@ -1,9 +1,11 @@
 [main]
-infile = ../PS1spec_host.txt
+infile = PS1phot_host.txt
 galparams = XCTmpl,Halpha_ew,Hbeta_ew,OIII_ew,OII_ew,Rpar
-outfile = galsnid_out.txt
-classfile = PIa_train.txt
-ratespriorfile = PIa_zprior.txt
+outfile = ps1phot_galsnidprob.txt
+classfile = GalSNID/PIa_train.txt
+ratespriorfile = GalSNID/PIa_zprior.txt
 redshiftcol = z
 idcol = ID
 snrthresh = 5
+writetypecol = 0
+spectypecol = type
