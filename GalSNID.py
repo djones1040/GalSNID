@@ -54,6 +54,9 @@ for classifying; should match header of input file""")
                               help='file with Bayesian probabilities for each parameter in galparams')
             parser.add_option('-r','--ratespriorfile', default=config.get('main','ratespriorfile'), type="string",
                               help='a file providing the SN rates prior.  Use header "# z frac_Ia frac_Ibc frac_II"')
+            parser.add_option('--zpadj', default=config.get('main','zpadj'), type="float",
+                              help='scale the Ia rates prior (good for checking robustness)')
+
             parser.add_option('-z','--redshiftcol', default=config.get('main','redshiftcol'), type="string",
                               help='name of the redshift column in the input file')
             parser.add_option('--idcol', default=config.get('main','idcol'), type="string",
@@ -78,6 +81,9 @@ for classifying; should match header of input file""")
                               help='file with Bayesian probabilities for each parameter in galparams')
             parser.add_option('-r','--ratespriorfile', default=None, type="string",
                               help='a file providing the SN rates prior.  Use header "# z frac_Ia frac_Ibc frac_II"')
+            parser.add_option('--zpadj', default=1.0, type="float",
+                              help='scale the Ia rates prior (good for checking robustness)')
+
             parser.add_option('-z','--redshiftcol', default='z', type="string",
                               help='name of the redshift column in the input file')
             parser.add_option('--idcol', default='ID', type="string",
@@ -200,7 +206,9 @@ followed by '_csnr' in the input file header to see if parameters have uncertain
     def ratesprior(self,z,cls):
         rp = txtobj(self.options.ratespriorfile)
         frac = 'frac_%s'%cls
-        return(np.interp(z,rp.__dict__[self.options.redshiftcol],rp.__dict__[frac]))
+        prior = np.interp(z,rp.__dict__[self.options.redshiftcol],rp.__dict__[frac])
+        if 'Ia' in cls: prior *= self.options.zpadj
+        return(prior)
 
 class PIaTable(object):
     def __init__(self,trainfile=None):
